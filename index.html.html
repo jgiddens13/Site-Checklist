@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Site Checklist">
+<title>Site Checklist</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#ffffff;--bg2:#f5f5f3;--bg3:#eeecea;
+  --text:#1a1a18;--text2:#6b6b67;--text3:#9b9b97;
+  --border:#d8d6d0;--border2:#bbb9b3;
+  --green:#0f6e56;--green-bg:#e1f5ee;--green-text:#085041;
+  --amber:#7a4d0a;--amber-bg:#faeeda;
+  --red:#a32d2d;--red-bg:#fcebeb;--red-text:#791f1f;
+  --blue-bg:#e6f1fb;--blue-text:#0c447c;--blue-border:#378add;
+  --orange:#7a3c00;--orange-bg:#fff0e0;
+  --radius:12px;--radius-sm:8px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1c1c1a;--bg2:#252523;--bg3:#2e2e2b;
+    --text:#f0efe9;--text2:#a0a09a;--text3:#66665f;
+    --border:#3a3a37;--border2:#4a4a47;
+    --green:#5dcaa5;--green-bg:#04342c;--green-text:#9fe1cb;
+    --amber:#ef9f27;--amber-bg:#2a1a00;
+    --red:#e24b4a;--red-bg:#2d1010;--red-text:#f7c1c1;
+    --blue-bg:#042c53;--blue-text:#b5d4f4;--blue-border:#378add;
+    --orange:#ef9f27;--orange-bg:#2a1800;
+  }
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;padding-bottom:110px}
+#app{max-width:500px;margin:0 auto;padding:12px 10px}
+
+/* SETUP */
+#setup-screen{display:block}
+#checklist-screen{display:none}
+.app-title{text-align:center;padding:18px 0 12px}
+.app-title strong{font-size:21px;display:block;color:var(--text);font-weight:700;margin-bottom:2px}
+.app-title span{font-size:12px;color:var(--text3)}
+.setup-card{background:var(--bg);border-radius:var(--radius);border:0.5px solid var(--border);padding:18px 16px;margin-bottom:10px}
+.setup-card h2{font-size:15px;font-weight:600;margin-bottom:14px;color:var(--text)}
+.field-group{margin-bottom:12px}
+.field-group:last-child{margin-bottom:0}
+.setup-label{font-size:12px;color:var(--text2);margin-bottom:5px;display:block;font-weight:500;text-transform:uppercase;letter-spacing:0.4px}
+.setup-input{width:100%;font-size:15px;padding:10px 12px;border-radius:var(--radius-sm);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);font-family:inherit;outline:none;appearance:none}
+.setup-input:focus{border-color:var(--blue-border);background:var(--bg)}
+.start-btn{width:100%;padding:14px;font-size:16px;font-weight:600;border-radius:var(--radius);border:none;background:var(--green);color:#fff;cursor:pointer;font-family:inherit;margin-top:6px;letter-spacing:0.2px}
+.start-btn:active{opacity:0.85}
+
+/* SITE HEADER */
+.site-header{background:var(--bg);border-radius:var(--radius);border:0.5px solid var(--border);padding:12px 14px;margin-bottom:8px}
+.site-header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+.site-info{flex:1;min-width:0}
+.site-name{font-size:16px;font-weight:600;color:var(--text)}
+.site-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.new-site-btn{font-size:12px;padding:7px 12px;border-radius:var(--radius-sm);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:inherit;white-space:nowrap;font-weight:500;flex-shrink:0}
+.crew-chips{display:flex;flex-wrap:wrap;gap:4px}
+.crew-chip{font-size:11px;padding:3px 8px;border-radius:99px;background:var(--bg3);color:var(--text2);border:0.5px solid var(--border)}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px}
+.stat{background:var(--bg);border-radius:var(--radius-sm);border:0.5px solid var(--border);padding:8px 10px;text-align:center}
+.stat-n{font-size:22px;font-weight:600;color:var(--text);line-height:1}
+.stat-n.green{color:var(--green)}
+.stat-n.red{color:var(--red)}
+.stat-lbl{font-size:10px;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:0.4px}
+
+/* PROGRESS */
+.prog-wrap{background:var(--bg);border-radius:var(--radius-sm);border:0.5px solid var(--border);padding:10px 14px;margin-bottom:8px}
+.prog-track{background:var(--bg3);border-radius:99px;height:9px;overflow:hidden;margin-bottom:5px}
+.prog-fill{background:var(--green);height:9px;border-radius:99px;transition:width 0.25s;min-width:0}
+.prog-text{font-size:12px;color:var(--text2)}
+
+/* FILTERS */
+.filter-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:8px;padding-bottom:2px}
+.filter-row{display:flex;gap:5px;width:max-content}
+.fbtn{font-size:12px;padding:6px 13px;border-radius:99px;border:0.5px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;font-family:inherit;white-space:nowrap}
+.fbtn.on{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-border);font-weight:500}
+.fbtn.warn-btn{color:var(--amber);border-color:var(--amber-bg);background:var(--amber-bg)}
+.fbtn.flag-btn-f{color:var(--red-text);border-color:var(--red-bg);background:var(--red-bg)}
+
+/* SECTIONS */
+.section{background:var(--bg);border-radius:var(--radius);border:0.5px solid var(--border);margin-bottom:7px;overflow:hidden}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;user-select:none;-webkit-user-select:none;gap:8px}
+.sec-left{display:flex;align-items:center;gap:8px;min-width:0}
+.sec-icon{font-size:19px;flex-shrink:0;width:22px;text-align:center}
+.sec-title-wrap{min-width:0}
+.sec-lbl{font-size:14px;font-weight:600;color:var(--text);line-height:1.2}
+.sec-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.sec-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.badge{font-size:11px;padding:3px 9px;border-radius:99px;font-weight:500;white-space:nowrap}
+.b-ok{background:var(--green-bg);color:var(--green-text)}
+.b-part{background:var(--amber-bg);color:var(--amber)}
+.b-zero{background:var(--bg3);color:var(--text3)}
+.b-flag{background:var(--red-bg);color:var(--red-text)}
+.caret{font-size:17px;color:var(--text3);transition:transform 0.18s;line-height:1;flex-shrink:0}
+.caret.open{transform:rotate(180deg)}
+.sec-body{display:none;border-top:0.5px solid var(--border)}
+.sec-body.open{display:block}
+
+/* ITEMS */
+.item{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-bottom:0.5px solid var(--border);cursor:pointer;background:var(--bg)}
+.item:last-child{border-bottom:none}
+.item:active{background:var(--bg2)}
+.cb{width:22px;height:22px;min-width:22px;border-radius:5px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;background:var(--bg);margin-top:1px;font-size:12px;font-weight:700;transition:all 0.12s;color:transparent;flex-shrink:0}
+.cb.ck{background:var(--green);border-color:var(--green);color:#fff}
+.cb.fl{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+.item-body{flex:1;min-width:0}
+.item-what{font-size:13px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:2px}
+.item-what.ck{text-decoration:line-through;color:var(--text3);font-weight:400}
+.item-why{font-size:12px;color:var(--text2);line-height:1.45;margin-bottom:3px}
+.item-why.ck{color:var(--text3)}
+.item-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.tag{font-size:10px;padding:2px 6px;border-radius:4px;white-space:nowrap;font-weight:500}
+.tag-miss{background:var(--amber-bg);color:var(--amber)}
+.tag-sub{background:var(--blue-bg);color:var(--blue-text)}
+.tag-rcc{background:var(--green-bg);color:var(--green-text)}
+.tag-hot{background:var(--orange-bg);color:var(--orange)}
+.flag-btn{font-size:13px;padding:5px 7px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;flex-shrink:0;margin-top:1px}
+.flag-btn.on{background:var(--red-bg);border-color:var(--red)}
+.no-items{padding:24px;text-align:center;color:var(--text3);font-size:13px}
+
+/* LEGEND */
+.legend{background:var(--bg);border-radius:var(--radius-sm);border:0.5px solid var(--border);padding:10px 14px;margin-bottom:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.legend-lbl{font-size:11px;color:var(--text3);margin-right:2px;width:100%}
+
+/* BOTTOM BAR */
+.bottom{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:0.5px solid var(--border);padding:8px 10px 24px;display:none;z-index:100}
+.bottom.show{display:flex;gap:6px;max-width:500px;margin:0 auto;left:50%;transform:translateX(-50%);right:auto;width:100%}
+.bot-btn{flex:1;font-size:11px;font-weight:500;padding:10px 4px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:inherit;text-align:center;line-height:1.3}
+.bot-btn:active{background:var(--bg3)}
+.bot-btn.warn{color:var(--red);border-color:var(--red-bg);background:var(--red-bg)}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- SETUP SCREEN -->
+<div id="setup-screen">
+  <div class="app-title">
+    <strong>🏗 Site Walkthrough</strong>
+    <span>River City Construction — OSHA 1926</span>
+  </div>
+  <div class="setup-card">
+    <h2>Start a new walkthrough</h2>
+    <div class="field-group">
+      <label class="setup-label" for="site-input">Job site name or address</label>
+      <input class="setup-input" id="site-input" type="text" placeholder="e.g. CAT Bldg 12 — Mossville" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="field-group">
+      <label class="setup-label">Subs on site today (select all present)</label>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:2px" id="sub-checkboxes"></div>
+    </div>
+  </div>
+  <button class="start-btn" onclick="startChecklist()">Start walkthrough →</button>
+</div>
+
+<!-- CHECKLIST SCREEN -->
+<div id="checklist-screen">
+  <div class="site-header">
+    <div class="site-header-top">
+      <div class="site-info">
+        <div class="site-name" id="site-name-display"></div>
+        <div class="site-meta" id="site-date-display"></div>
+      </div>
+      <button class="new-site-btn" onclick="newSite()">New site</button>
+    </div>
+    <div class="crew-chips" id="crew-chips"></div>
+  </div>
+
+  <div class="stats-row" id="stats"></div>
+  <div class="prog-wrap">
+    <div class="prog-track"><div class="prog-fill" id="pbar" style="width:0%"></div></div>
+    <div class="prog-text" id="prog-text"></div>
+  </div>
+
+  <div class="legend">
+    <span class="legend-lbl">Key:</span>
+    <span class="tag tag-miss">easy miss</span><span style="font-size:11px;color:var(--text2)"> = commonly overlooked</span>
+    <span class="tag tag-sub">sub</span><span style="font-size:11px;color:var(--text2)"> = sub-specific check</span>
+    <span class="tag tag-rcc">RCC</span><span style="font-size:11px;color:var(--text2)"> = RCC responsibility</span>
+  </div>
+
+  <div class="filter-scroll"><div class="filter-row" id="filters"></div></div>
+  <div id="sections"></div>
+</div>
+</div>
+
+<div class="bottom" id="bottom-bar">
+  <button class="bot-btn" onclick="setFilter('miss')">⚠️<br>Easy-miss</button>
+  <button class="bot-btn" onclick="setFilter('flagged')">🚩<br>Flagged</button>
+  <button class="bot-btn" onclick="setFilter('all')">☰<br>All items</button>
+  <button class="bot-btn warn" onclick="confirmReset()">↺<br>Reset</button>
+</div>
+
+<script>
+const SUB_TYPES=['Electrical','Plumbing/Mechanical','Steel/Ironwork','Concrete/Masonry','Drywall/Framing','Roofing','Excavation/Civil'];
+
+// Each item has:
+//  t = what to look for (short, action phrase)
+//  w = why it matters / what to actually look at on site
+//  miss = true if commonly overlooked
+//  sub = array of sub types it applies to (empty = everyone)
+//  rcc = true if RCC/GC responsibility specifically
+const CATS=[
+  {id:'arrival',label:'Site arrival & setup',icon:'🚗',sub:'First thing when you pull up',items:[
+    {id:'ar1',t:'Site entrance is clean and clearly marked',w:'Mud tracked onto public road, no signage, or blocked emergency access is an immediate issue. Look at the gate/entry before you even get out of the truck.',miss:true,rcc:true},
+    {id:'ar2',t:'Visitors and workers signing in — site control in place',w:'Anyone on site who isn\'t badged or checked in is a liability. RCC should have a sign-in log or someone controlling access.',rcc:true},
+    {id:'ar3',t:'Emergency info posted at site entrance',w:'Site address, 911 note, nearest hospital, and emergency contacts. Has to be visible from the road if possible. Easy one to overlook.',miss:true,rcc:true},
+    {id:'ar4',t:'You can see the overall site condition from the perimeter — nothing obviously wrong',w:'Before you walk in, take 30 seconds and scan the whole site. Open trenches, missing barriers, material hanging off edges, smoking near fuel — catch the big stuff first.'},
+  ]},
+  {id:'rcc_admin',label:'RCC program & docs',icon:'📋',sub:'Your stuff as GC',items:[
+    {id:'ra1',t:'Site-specific safety plan is on site and current',w:'Not just a generic binder — it should reflect this job. If OSHA walked in right now, could you hand it over? Check it\'s in the trailer or site box.',miss:true,rcc:true},
+    {id:'ra2',t:'OSHA "It\'s Your Right" poster (3165) posted',w:'Required at every job site. Gets forgotten constantly. Should be in the trailer or a visible common area. If it\'s not there, that\'s a citation.',miss:true,rcc:true},
+    {id:'ra3',t:'JHA / JSA completed for today\'s high-risk tasks',w:'Not a checkbox exercise — the crew doing the work should have actually talked through it. Fall protection, excavation, rigging, hot work — anything with real hazard exposure needs a current JHA.',rcc:true},
+    {id:'ra4',t:'Daily safety briefing held and documented',w:'Even a 5-minute tailgate counts. The key is it\'s documented with signatures. If something happens, this is the first thing OSHA asks for.',rcc:true},
+    {id:'ra5',t:'Incident reporting procedure communicated to all subs',w:'Every sub on site needs to know the process — who to call, what to document, when. Not just RCC guys. Go ask a sub foreman if they know the answer.',miss:true,rcc:true},
+    {id:'ra6',t:'Competent persons identified for each applicable hazard on site',w:'Someone specific needs to own fall protection, excavation, scaffolding, and any other 1926 category that\'s active today. "The foreman" isn\'t good enough — it should be a named, qualified person.',rcc:true},
+    {id:'ra7',t:'Sub safety documentation current — certs, insurance, orientations',w:'Before a sub touches anything, RCC should have their OSHA cards, insurance cert, and site orientation acknowledgment on file. Spot-check subs you haven\'t verified recently.',miss:true,rcc:true},
+  ]},
+  {id:'ppe',label:'PPE — everyone on site',icon:'⛑',sub:'Walk the site and watch what people are actually wearing',items:[
+    {id:'pp1',t:'Hard hats on every person — correct class for the task',w:'Class E for electrical exposure, Class G minimum everywhere else. Cracked shells, missing suspension, hats worn backwards — all violations. Look at the hat, not just whether they\'re wearing one.',miss:true},
+    {id:'pp2',t:'Safety glasses worn wherever there\'s eye hazard exposure',w:'Grinding, cutting, nailing, demolition, overhead work — if debris can reach the eyes it\'s required. Side shields matter too. Check subs especially — they tend to pull glasses off between tasks.',miss:true,sub:['Electrical','Concrete/Masonry','Steel/Ironwork','Drywall/Framing']},
+    {id:'pp3',t:'High-vis vests on in any vehicle or equipment traffic zone',w:'Any area where a forklift, excavator, delivery truck, or site vehicle moves — everyone walking in that zone needs hi-vis. This includes guys walking through to get somewhere else.',},
+    {id:'pp4',t:'Foot protection — steel-toed boots on all workers',w:'Sneakers, work shoes without protection, soft-toe boots — all violations on an active construction site. Worth a walk through and a look down.'},
+    {id:'pp5',t:'Gloves in use for hand-hazard tasks',w:'Material handling, rebar, sheet metal, demo — bare hands on sharp or heavy material is an easy miss. You\'ll see it mostly with subs who are rushing.',miss:true,sub:['Steel/Ironwork','Concrete/Masonry','Roofing']},
+    {id:'pp6',t:'Hearing protection available and being used near loud equipment',w:'Jackhammers, concrete saws, compactors, generators — 85 dB+ requires protection. "Available" isn\'t enough, they need to actually wear it. Check around loud equipment.',miss:true,sub:['Concrete/Masonry','Excavation/Civil']},
+    {id:'pp7',t:'Respiratory protection in use for dust-generating tasks',w:'Concrete cutting, drywall sanding, insulation, demo — N95 minimum. This is the one that gets skipped most on short tasks. "It\'s just a quick cut" is how silica exposure happens.',miss:true,sub:['Concrete/Masonry','Drywall/Framing','Roofing']},
+    {id:'pp8',t:'All PPE is in good condition',w:'Cracked lenses, damaged hard hat shells, torn harness webbing, frayed gloves — worn-out PPE is non-compliant same as no PPE. Do a quick visual on the stuff people are actually using.',miss:true},
+  ]},
+  {id:'fall',label:'Fall protection',icon:'🪜',sub:'Priority #1 — walk every elevated surface and opening',items:[
+    {id:'fp1',t:'Every unprotected edge 6 ft or higher has fall protection',w:'Guardrails, personal fall arrest, or safety nets — one of the three has to be in place. Walk the perimeter of every elevated deck, floor, platform, or roof. Don\'t just look from below.',},
+    {id:'fp2',t:'Guardrails are correct: 42" top rail, 21" mid-rail, toeboard where required',w:'The mid-rail is the one that\'s always missing or knocked out. Toeboards are required wherever tools or materials could fall on someone below. Measure if you\'re not sure — "looks about right" won\'t hold up.',miss:true},
+    {id:'fp3',t:'All floor and wall openings are covered and labeled "HOLE"',w:'Plywood covers get kicked aside, moved by other trades, or left unmarked. Every opening needs a cover that\'s secured (not just laid on top), capable of holding weight, and labeled. Walk every floor and check.',miss:true,sub:['Electrical','Plumbing/Mechanical','Steel/Ironwork']},
+    {id:'fp4',t:'Harnesses inspected before use — no frayed webbing, damaged hardware',w:'Pre-use inspection is the worker\'s job but it\'s your job to ask. Check buckles, D-rings, webbing for cuts or UV damage. A harness stored in a truck bed in the sun degrades fast.',miss:true,sub:['Roofing','Steel/Ironwork']},
+    {id:'fp5',t:'Anchor points are adequate — rated 5,000 lbs per worker or engineered',w:'Shooting a hook into decking or a strap around a pipe doesn\'t cut it. Anchor points have to be specifically rated or engineered. Ask to see documentation if it\'s not obvious.',miss:true,sub:['Roofing','Steel/Ironwork']},
+    {id:'fp6',t:'Ladders extend 3 ft above the landing and are secured top and bottom',w:'Both ends. A ladder tied only at the bottom can kick out at the top. Look for the 3-ft extension past the landing — it\'s there so you have something to hold getting on and off.',miss:true},
+    {id:'fp7',t:'Ladders are on stable footing, set at correct angle (4:1 ratio)',w:'One foot out for every four feet of height. Ladders on mud, uneven ground, or leaning against something that can move are asking for a fall. Look at the base and the lean.',},
+    {id:'fp8',t:'Scaffold erected by competent person — tags current',w:'Check the green/red scaffold tag system. Red tag means stay off. If there\'s no tag, treat it as red. Competent person has to inspect after any alteration, bad weather, or 30-day interval.',sub:['Steel/Ironwork','Concrete/Masonry','Drywall/Framing','Roofing']},
+    {id:'fp9',t:'Scaffold has guardrails, mid-rails, toeboards, and safe access',w:'Same guardrail standards as any other platform. Access has to be a ladder or stairway — climbing the cross-braces is a violation. Check that the planks are tied down and full-width with no gaps.',miss:true,sub:['Steel/Ironwork','Concrete/Masonry','Drywall/Framing','Roofing']},
+    {id:'fp10',t:'Scaffold baseplates and mudsills on firm, level ground',w:'Baseplates with mud under them or screw jacks cranked out too far are a collapse waiting to happen. Especially after rain — check if the ground has shifted.',miss:true,sub:['Steel/Ironwork','Concrete/Masonry','Drywall/Framing','Roofing']},
+    {id:'fp11',t:'Roofing work — leading edge protection or warning line system in place',w:'Warning line systems need to be at least 6 ft from the leading edge and monitored. If subs are within 6 ft of the edge, they need full fall protection. Watch what they\'re actually doing, not just where the warning line is.',sub:['Roofing']},
+  ]},
+  {id:'elec',label:'Electrical — temp power',icon:'⚡',sub:'Walk every cord, panel, and outlet on site',items:[
+    {id:'el1',t:'GFCI protection on all 120V temporary power',w:'Every outlet and cord on site. Either GFCI outlets at the panel, inline GFCI devices, or a GFCI-protected cord. Check each one — this is the most common electrical citation on construction sites and inspectors walk straight to the cords.',miss:true,rcc:true},
+    {id:'el2',t:'Extension cords are rated for the use — 12 AWG minimum, outdoor rated',w:'Household extension cords (16 or 14 AWG, 2-prong, light-duty) on a job site are a violation. Look for the cord gauge printed on the jacket. Orange or yellow heavy-duty outdoor cords are what you want to see.',miss:true},
+    {id:'el3',t:'No damaged, taped, or spliced cords in use',w:'Electrical tape over a damaged cord is not a repair — it\'s a violation. Any cord with exposed conductors, cuts in the jacket, or improvised splices gets pulled. Walk the cords end to end, especially where they cross traffic.',miss:true,sub:['Electrical']},
+    {id:'el4',t:'Cords are protected where they cross traffic — not a trip or damage hazard',w:'Cords running across walkways, doorways, or anywhere equipment rolls over them need ramps, covers, or overhead routing. A forklift wheel on a cord will ruin your day.',miss:true},
+    {id:'el5',t:'Temporary panels have covers — no open knockouts or exposed wiring',w:'Blank plates on unused breaker positions, panel doors closed and latched. Any exposed live conductor in a temp panel is a citation. Electrical subs are usually good about this but check anyway.',sub:['Electrical']},
+    {id:'el6',t:'Electrical work on energized systems follows LOTO — permits and lockouts in place',w:'If an electrician is working on anything energized, there should be a lockout on the breaker and a permit or log entry. This is where subs skip steps — "I\'ll just be a second" is how electrocutions happen.',sub:['Electrical']},
+    {id:'el7',t:'Overhead powerline clearances maintained — 10 ft minimum for equipment',w:'Cranes, excavators, man lifts, scaffolding — anything that moves near overhead lines. 10 ft is the minimum, more for higher voltage. Know where the lines are before equipment moves in. Ask the sub foreman if they\'ve identified them.',rcc:true},
+    {id:'el8',t:'All corded tools are grounded or double-insulated',w:'3-prong plugs not cut off, no adapters defeating the ground. Double-insulated tools (marked on the tool) don\'t need grounding. If you see a 3-to-2 prong adapter, that\'s a violation.',miss:true,sub:['Electrical','Drywall/Framing','Concrete/Masonry']},
+  ]},
+  {id:'hazcom',label:'Hazard communication',icon:'☣',sub:'Check chemical storage, labels, and SDS access',items:[
+    {id:'hc1',t:'SDS binder or digital SDS available for every chemical on site',w:'Concrete, solvents, adhesives, paints, cleaning products — all of it. OSHA requires SDS accessible to workers during their shift. "We have it in the truck" doesn\'t cut it if they can\'t get to it quickly.',miss:true,rcc:true},
+    {id:'hc2',t:'Every chemical container has a label — product name and hazard info',w:'Spray bottles, buckets, secondary containers — anything that product was transferred into needs a label. Blank spray bottles filled with solvent are a common violation. Check what subs are using.',miss:true,sub:['Electrical','Plumbing/Mechanical','Roofing']},
+    {id:'hc3',t:'Silica control plan in place for any cutting, grinding, or drilling of concrete or masonry',w:'OSHA 1926.1153 — one of the most cited violations in construction right now. If a concrete or masonry sub is cutting, you need to see wet methods, local exhaust ventilation, or at minimum N95s and documented exposure control. Ask to see the plan.',miss:true,sub:['Concrete/Masonry']},
+    {id:'hc4',t:'Workers are trained on the chemicals they\'re using',w:'HazCom training — they should know what the hazards are, where the SDS is, and what PPE to use. You don\'t need to quiz them, but ask the sub foreman if his guys have been trained on site chemicals.',sub:['Roofing','Concrete/Masonry','Plumbing/Mechanical']},
+    {id:'hc5',t:'Asbestos or lead assessment done before demo or renovation work',w:'Any building built before 1980 — roof tiles, floor tiles, pipe insulation, drywall compound, paint. Don\'t let subs start demo without confirmation of a prior assessment. This one carries serious liability.',miss:true,sub:['Drywall/Framing','Roofing','Concrete/Masonry'],rcc:true},
+  ]},
+  {id:'exca',label:'Excavation & trenching',icon:'⛏',sub:'Active whenever excavation or civil subs are on site',items:[
+    {id:'ex1',t:'JULIE (811) utility locate completed and marked before any digging',w:'Every dig, every time — no exceptions. Get the locate ticket number and keep it. If the marks are old and faded, that\'s a problem. Digging without a locate is a citable offense and a life-safety issue.',rcc:true},
+    {id:'ex2',t:'Competent person has inspected the excavation today',w:'Daily inspection before workers enter, and after any rain, freeze/thaw, or vibration from nearby equipment. Inspection has to be documented. Ask the excavation sub who their competent person is by name.',sub:['Excavation/Civil']},
+    {id:'ex3',t:'Proper cave-in protection in place — sloping, shoring, or trench box at 5 ft+',w:'The most important one. Below 5 ft it\'s required, but competent person judgment applies below that too. Sloping has to match soil type — Type C soil (most soil you\'ll see in central IL) needs a 1½:1 slope minimum.',sub:['Excavation/Civil']},
+    {id:'ex4',t:'Spoil pile is at least 2 ft back from the excavation edge',w:'Spoil adds surcharge load to the trench wall and can cause collapse. Walk the edge and look — this one gets pushed out of the way constantly as the job moves. Most-cited excavation violation.',miss:true,sub:['Excavation/Civil']},
+    {id:'ex5',t:'Safe egress — ladder or ramp within 25 ft of any worker in the trench',w:'If you can see workers in a trench and there\'s no ladder nearby, that\'s a citation. Ladder has to extend 3 ft above grade. Check both ends of long trenches.',miss:true,sub:['Excavation/Civil']},
+    {id:'ex6',t:'Excavation perimeter is barricaded — pedestrians and equipment can\'t walk into it',w:'Hard barricade, not just cones. Anyone or any equipment that could fall into the excavation needs to be kept out by a physical barrier. Especially at the end of the day after the crew leaves.',miss:true,rcc:true},
+    {id:'ex7',t:'Atmospheric testing done for excavations 4 ft+ with potential hazardous atmosphere',w:'Near old sewer lines, gas lines, fuel tanks, or areas with standing water. CO, oxygen deficiency, flammable gas — if there\'s any potential, it needs to be tested before entry and monitored continuously.',miss:true,sub:['Excavation/Civil','Plumbing/Mechanical']},
+  ]},
+  {id:'tools',label:'Tools & equipment',icon:'🔧',sub:'Watch what subs are using and how',items:[
+    {id:'tl1',t:'All guards are in place on power tools — grinder guards, saw guards, blade covers',w:'The most common one: angle grinder disc guards removed. Guards exist because the disc can shatter at 10,000+ RPM. If a sub has removed the guard "to get in tighter," that\'s a stop-work situation.',miss:true,sub:['Concrete/Masonry','Steel/Ironwork','Drywall/Framing']},
+    {id:'tl2',t:'Face shields in use with grinding — not just safety glasses',w:'Safety glasses alone are not sufficient for grinding operations. Grinding requires a face shield over safety glasses. You\'ll see subs skip this constantly.',miss:true,sub:['Concrete/Masonry','Steel/Ironwork']},
+    {id:'tl3',t:'Disc condition on grinders — no cracks, rated RPM matches the tool',w:'Inspect the disc before use — cracks, chips, or a max RPM rating lower than the tool\'s speed means it can explode. Workers should be doing this but check what you see in use.',miss:true,sub:['Concrete/Masonry','Steel/Ironwork']},
+    {id:'tl4',t:'Pneumatic hose connections have whip checks or safety pins',w:'If a pressurized hose connection lets go, the hose whips violently. A $5 whip check prevents that. Check every hose-to-tool and hose-to-hose connection.',miss:true,sub:['Concrete/Masonry','Roofing','Drywall/Framing']},
+    {id:'tl5',t:'Powder-actuated tools operated only by trained/authorized person',w:'Hilti guns, Ramset — the operator should have a manufacturer\'s certification card. Anyone who can\'t produce a card shouldn\'t be pulling the trigger. Also check for a shield/guarding on the tool.',sub:['Steel/Ironwork','Concrete/Masonry','Drywall/Framing']},
+    {id:'tl6',t:'Hand tools in usable condition — no cracked handles, mushroomed heads, bent shanks',w:'Mushroomed chisel or punch head, cracked hammer handle, bent screwdrivers being used as chisels — all violations and real injury hazards. Do a quick visual on tool bins and job boxes.',miss:true},
+  ]},
+  {id:'equip',label:'Mobile equipment & rigging',icon:'🚧',sub:'Cranes, lifts, forklifts, excavators, deliveries',items:[
+    {id:'eq1',t:'Pre-use equipment inspection documented for the day',w:'Every piece of heavy equipment — forklift, excavator, man lift, crane, skid steer. Should be a written form or app entry from before first use. Ask the operator to show you.',rcc:true},
+    {id:'eq2',t:'Backup alarms working on all equipment with limited rear visibility',w:'Walk behind the equipment and listen. If you can\'t hear the alarm at a working distance, it\'s not effective. Dead batteries or damaged speakers are common.',miss:true},
+    {id:'eq3',t:'Operators are wearing seatbelts',w:'Forklift tip-overs kill operators who jump out. Excavator cab rollover same thing. If you see an operator without a belt, stop and address it directly.',miss:true},
+    {id:'eq4',t:'Spotters are being used when equipment is near workers or in blind zones',w:'If a piece of equipment is moving and workers are anywhere in the travel zone, there should be a designated spotter — not just someone who happens to be nearby. Spotter needs to be in direct communication with the operator.',miss:true,rcc:true},
+    {id:'eq5',t:'Forklift operators are certified — certification card available',w:'Ask the operator for their cert card. If they don\'t have it, the sub foreman needs to produce it. Operating a forklift without certification is a citation on the sub and potentially on RCC.',sub:['Steel/Ironwork','Concrete/Masonry','Roofing']},
+    {id:'eq6',t:'Load capacity plates are readable on all forklifts and cranes',w:'Faded, missing, or covered capacity plates mean the operator has no reference for safe loading. Also check that modifications haven\'t voided the rating — aftermarket attachments change the capacity.',sub:['Steel/Ironwork']},
+    {id:'eq7',t:'Rigging hardware inspected — no bent hooks, cracked shackles, worn or damaged slings',w:'Synthetic slings with cuts or UV damage get retired. Chain with stretched links or opened hooks gets retired. Ask the steel or concrete sub who inspects their rigging and when.',miss:true,sub:['Steel/Ironwork','Concrete/Masonry']},
+    {id:'eq8',t:'Qualified rigger and designated signal person on any crane or hoist pick',w:'These are defined roles under 1926.1400 — not just "whoever is standing there." Signal person needs to be trained in hand signals or radio protocol. Rigger needs to be qualified for the lift type. Confirm before a pick starts.',miss:true,sub:['Steel/Ironwork'],rcc:true},
+    {id:'eq9',t:'Equipment exclusion zones established — no workers inside swing or travel radius',w:'Mark it with cones, rope, or flagging. Anyone who doesn\'t need to be in the equipment\'s work zone shouldn\'t be there. This includes delivery trucks being unloaded.',rcc:true},
+  ]},
+  {id:'fire',label:'Fire prevention & hot work',icon:'🔥',sub:'Welding, cutting, grinding, fuel storage',items:[
+    {id:'fi1',t:'Fire extinguisher within 100 ft of combustible work, 50 ft of flammables',w:'Not just "on site somewhere." Walk the work area and find the nearest extinguisher — if it\'s more than 100 ft, it\'s not compliant. Also verify it\'s the right class: ABC for general, CO2 near electrical.',miss:true,rcc:true},
+    {id:'fi2',t:'Extinguisher tags are current — monthly inspection within last 30 days',w:'The tag on the side shows the last inspection date. Outdated tag is a citation even if the extinguisher is fully charged. This is one of the first things an OSHA inspector checks.',miss:true,rcc:true},
+    {id:'fi3',t:'Hot work permit issued for welding, cutting, or grinding near combustibles',w:'Before any hot work starts near wood framing, insulation, fuel, or other combustibles — there should be a permit. Check who issued it and if the area has been inspected.',miss:true,sub:['Steel/Ironwork','Plumbing/Mechanical','Electrical']},
+    {id:'fi4',t:'Fire watch in place during hot work and 30 minutes after',w:'The fire watch person has ONE job — watching for fire. They can\'t be doing anything else. And the 30-minute after period is required because smoldering in insulation or framing shows up delayed.',miss:true,sub:['Steel/Ironwork','Plumbing/Mechanical','Electrical']},
+    {id:'fi5',t:'Flammable and combustible liquids in approved safety cans',w:'Red safety cans with spring-loaded caps and flame arrestors. Open gas cans, plastic water jugs full of solvent, unmarked containers — all violations. Check behind equipment and in sub staging areas.',sub:['Roofing','Plumbing/Mechanical']},
+    {id:'fi6',t:'No ignition sources near fuel storage or flammable material areas',w:'Smoking, cutting, grinding, engine exhaust — all need to be separated from stored fuel and flammables. Establish a dedicated fuel storage area with appropriate signage.',rcc:true},
+  ]},
+  {id:'hk',label:'Housekeeping & site conditions',icon:'🧹',sub:'One of the most visible things on a site — walk it with fresh eyes',items:[
+    {id:'hk1',t:'Walkways and access routes are passable — no debris, materials, or equipment blocking them',w:'The path from point A to point B on your site should be obvious and clear. If someone has to climb over stuff or walk through a work zone to get where they\'re going, that\'s a hazard. Also impacts emergency egress.',miss:true,rcc:true},
+    {id:'hk2',t:'Discarded formwork lumber has nails removed or bent over',w:'This is the #1 most common minor citation on construction sites. Boards with nails sticking up, scattered across the work area. Walk through the concrete and framing areas specifically.',miss:true,sub:['Concrete/Masonry','Drywall/Framing']},
+    {id:'hk3',t:'Scrap and debris are being collected and removed — not accumulating',w:'Drywall scraps, wire cuttings, packaging, cut lumber ends — if it\'s piling up, it\'s a fire hazard, a trip hazard, and a sign that housekeeping isn\'t being enforced. Each sub owns their own area.',miss:true,rcc:true},
+    {id:'hk4',t:'Materials are stacked and stored stably — not tipping, not near edges',w:'Stacked material that can tip onto a worker, or stored near an elevated edge where it could fall — both are violations. Look at how subs are staging material on floors and at the perimeter.',miss:true,sub:['Steel/Ironwork','Concrete/Masonry','Drywall/Framing']},
+    {id:'hk5',t:'Adequate lighting in all active work areas',w:'5 foot-candles minimum for general work areas, 10 for stairs and ladders. If you can\'t clearly see what you\'re doing or where you\'re walking, lighting is insufficient. Interior spaces without windows need temporary lighting.',miss:true,rcc:true},
+    {id:'hk6',t:'Stairs with 4+ risers have handrails — temporary stairs included',w:'Any stair run with 4 or more steps needs a graspable rail. Temporary wood stair stringers with no rail are common on active builds. It seems minor until someone falls.',miss:true,rcc:true},
+    {id:'hk7',t:'Site entry and temp roads are maintained — no mud, rutting, or slip hazards',w:'Muddy site entry gets tracked onto public roads (code issue), makes footing hazardous, and signals poor site management. Check the entry and any haul routes after rain.',rcc:true},
+    {id:'hk8',t:'Waste and sanitation areas are maintained and away from work zones',w:'Full dumpsters, scattered trash near food/break areas, sanitation not serviced — all citable and bad for morale. Also check that food and break areas are not near chemical storage or dusty work.',miss:true,rcc:true},
+  ]},
+  {id:'sanitation',label:'Sanitation & welfare',icon:'🚿',sub:'Basic stuff but easy to let slide',items:[
+    {id:'sa1',t:'Sufficient portable toilets — minimum 1 per 20 workers, serviced regularly',w:'Count heads and count toilets. If there are 40 workers on site there should be at least 2 units. Check that they\'re been recently serviced — overflowing or filthy units are a health violation.',rcc:true},
+    {id:'sa2',t:'Potable drinking water available — individual cups or fountain, not shared ladle',w:'Water source needs to be clearly marked as potable. Individual single-use cups or a drinking fountain. A shared ladle or community cup is a specific OSHA violation. Check the cooler setup.',miss:true,rcc:true},
+    {id:'sa3',t:'Handwashing facilities available near toilet facilities',w:'Soap and water or hand sanitizer at minimum. Often skipped when there\'s a port-a-john without a wash station nearby. Especially important on sites with concrete, chemical, or lead exposure.',miss:true,rcc:true},
+    {id:'sa4',t:'Break and eating areas are separated from work areas and chemical hazards',w:'Workers eating lunch next to where concrete is being cut or near solvent storage is a contamination hazard. There should be a designated clean area — even just a table away from the work zone.',rcc:true},
+  ]},
+  {id:'firstaid',label:'First aid & emergency',icon:'🩺',sub:'Know where everything is before you need it',items:[
+    {id:'fa1',t:'First aid kit is stocked and accessible — not locked away or buried',w:'Pop it open and look inside. Expired bandages, empty compartments, missing eye wash — any of these is a violation. It needs to be accessible to workers without having to ask someone for the key.',miss:true,rcc:true},
+    {id:'fa2',t:'At least one first aid/CPR certified person is on site or within 3-4 minutes',w:'If the nearest medical facility is more than 3-4 minutes away, OSHA requires a certified first-aider on site. Know who that person is by name. Confirm they\'re actually on site today.',miss:true,rcc:true},
+    {id:'fa3',t:'Eye wash station accessible wherever chemical splash risk exists',w:'Concrete work, chemical solvents, battery charging, any irritant chemical — plumbed or portable eyewash within 10 seconds of the hazard. Check that it\'s charged, clean, and unlocked.',miss:true,sub:['Electrical','Concrete/Masonry','Plumbing/Mechanical']},
+    {id:'fa4',t:'Emergency numbers and site address posted visibly',w:'911, nearest hospital, Poison Control (1-800-222-1222). The site address is critical — in an emergency, an injured worker or panicked sub may not know the address to give 911. Post it at the entrance and in the trailer.',miss:true,rcc:true},
+    {id:'fa5',t:'All workers know the emergency procedure — who to call, where to go',w:'This is a quick check to do with a random sub worker — not a gotcha, just ask them what they\'d do if someone got hurt. If they don\'t know, that\'s a gap in your site orientation.',miss:true,rcc:true},
+  ]},
+];
+
+const SUB_KEY='rcc_cl_v3';
+let S={site:'',date:'',subs:[],checked:{},flagged:{},open:{},filter:'all'};
+
+function load(){
+  try{const d=localStorage.getItem(SUB_KEY);if(d){S=Object.assign({site:'',date:'',subs:[],checked:{},flagged:{},open:{},filter:'all'},JSON.parse(d));}}catch(e){}
+  if(!S.open||!Object.keys(S.open).length)CATS.forEach(c=>S.open[c.id]=true);
+}
+function save(){try{localStorage.setItem(SUB_KEY,JSON.stringify(S));}catch(e){}}
+
+// Build sub checkboxes
+function buildSubCheckboxes(){
+  const wrap=document.getElementById('sub-checkboxes');
+  wrap.innerHTML=SUB_TYPES.map(s=>{
+    const sid='sub_'+s.replace(/[^a-z]/gi,'_');
+    return `<label style="display:flex;align-items:center;gap:5px;font-size:13px;color:var(--text2);cursor:pointer;padding:4px 0">
+      <input type="checkbox" id="${sid}" value="${s}" style="width:16px;height:16px;accent-color:var(--green)"> ${s}
+    </label>`;
+  }).join('');
+}
+
+function startChecklist(){
+  const v=document.getElementById('site-input').value.trim();
+  S.site=v||'Unnamed site';
+  S.date=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+  S.subs=SUB_TYPES.filter(s=>{
+    const el=document.getElementById('sub_'+s.replace(/[^a-z]/gi,'_'));
+    return el&&el.checked;
+  });
+  S.checked={};S.flagged={};S.filter='all';
+  CATS.forEach(c=>S.open[c.id]=true);
+  save();showChecklist();
+}
+
+function newSite(){
+  const hasProgress=Object.keys(S.checked).length>0||Object.keys(S.flagged).length>0;
+  if(hasProgress){if(!confirm('Start a new site? Current walkthrough will be cleared.'))return;}
+  S={site:'',date:'',subs:[],checked:{},flagged:{},open:{},filter:'all'};
+  save();
+  document.getElementById('site-input').value='';
+  // uncheck all subs
+  SUB_TYPES.forEach(s=>{const el=document.getElementById('sub_'+s.replace(/[^a-z]/gi,'_'));if(el)el.checked=false;});
+  document.getElementById('setup-screen').style.display='block';
+  document.getElementById('checklist-screen').style.display='none';
+  document.getElementById('bottom-bar').classList.remove('show');
+}
+
+function showChecklist(){
+  document.getElementById('setup-screen').style.display='none';
+  document.getElementById('checklist-screen').style.display='block';
+  document.getElementById('bottom-bar').classList.add('show');
+  document.getElementById('site-name-display').textContent=S.site;
+  document.getElementById('site-date-display').textContent=S.date+(S.subs.length?' · '+S.subs.length+' sub type'+(S.subs.length>1?'s':''):'');
+  document.getElementById('crew-chips').innerHTML=S.subs.length
+    ? S.subs.map(s=>`<span class="crew-chip">${s}</span>`).join('')
+    : '<span style="font-size:11px;color:var(--text3)">No subs selected</span>';
+  render();
+}
+
+function toggleCheck(id){
+  if(S.checked[id])delete S.checked[id];
+  else{S.checked[id]=true;delete S.flagged[id];}
+  save();render();
+}
+function toggleFlag(id,e){
+  e.stopPropagation();
+  if(S.flagged[id])delete S.flagged[id];
+  else{S.flagged[id]=true;delete S.checked[id];}
+  save();render();
+}
+function toggleSec(id){S.open[id]=!S.open[id];save();render();}
+function setFilter(f){S.filter=f;save();render();}
+function confirmReset(){
+  if(confirm('Clear all checks and flags for this site?')){
+    S.checked={};S.flagged={};S.filter='all';
+    CATS.forEach(c=>S.open[c.id]=true);
+    save();render();
+  }
+}
+
+// Filter items — if subs are selected, show items relevant to those subs
+// An item is relevant if: it has no sub array (applies to all), or its sub array intersects with selected subs
+function itemVisible(item){
+  if(!item.sub||item.sub.length===0) return true;
+  if(!S.subs||S.subs.length===0) return true;
+  return item.sub.some(s=>S.subs.includes(s));
+}
+
+function visCats(){
+  let cats=CATS.map(c=>({...c,items:c.items.filter(i=>itemVisible(i))})).filter(c=>c.items.length);
+  if(S.filter==='all') return cats;
+  if(S.filter==='miss') return cats.map(c=>({...c,items:c.items.filter(i=>i.miss)})).filter(c=>c.items.length);
+  if(S.filter==='flagged') return cats.map(c=>({...c,items:c.items.filter(i=>S.flagged[i.id])})).filter(c=>c.items.length);
+  return cats.filter(c=>c.id===S.filter);
+}
+
+function badge(cat){
+  const items=cat.items.filter(i=>itemVisible(i));
+  const t=items.length,d=items.filter(i=>S.checked[i.id]).length,fl=items.filter(i=>S.flagged[i.id]).length;
+  if(fl) return `<span class="badge b-flag">${fl} flagged</span>`;
+  if(d===t&&t>0) return `<span class="badge b-ok">Done ✓</span>`;
+  if(d) return `<span class="badge b-part">${d}/${t}</span>`;
+  return `<span class="badge b-zero">0/${t}</span>`;
+}
+
+function render(){
+  const allVisible=CATS.flatMap(c=>c.items.filter(i=>itemVisible(i)));
+  const total=allVisible.length;
+  const done=allVisible.filter(i=>S.checked[i.id]).length;
+  const flags=allVisible.filter(i=>S.flagged[i.id]).length;
+  const pct=total?Math.round(done/total*100):0;
+
+  document.getElementById('pbar').style.width=pct+'%';
+  document.getElementById('prog-text').textContent=`${done} of ${total} checked (${pct}%)${flags?' · '+flags+' flagged':''}`;
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><div class="stat-n green">${done}</div><div class="stat-lbl">Checked</div></div>
+    <div class="stat"><div class="stat-n">${total-done}</div><div class="stat-lbl">Remaining</div></div>
+    <div class="stat"><div class="stat-n${flags?' red':''}">${flags}</div><div class="stat-lbl">Flagged</div></div>
+  `;
+
+  const visCatsAll=CATS.map(c=>({...c,items:c.items.filter(i=>itemVisible(i))})).filter(c=>c.items.length);
+  const catBtns=visCatsAll.map(c=>`<button class="fbtn${S.filter===c.id?' on':''}" onclick="setFilter('${c.id}')">${c.icon} ${c.label}</button>`).join('');
+  document.getElementById('filters').innerHTML=`
+    <button class="fbtn${S.filter==='all'?' on':''}" onclick="setFilter('all')">All</button>
+    <button class="fbtn${S.filter==='miss'?' on':''}" onclick="setFilter('miss')">⚠ Easy-miss</button>
+    <button class="fbtn${S.filter==='flagged'?' on':''}" onclick="setFilter('flagged')">🚩 Flagged</button>
+    ${catBtns}
+  `;
+
+  const vis=visCats();
+  if(!vis.length){document.getElementById('sections').innerHTML='<div class="no-items">No items match this filter.</div>';return;}
+
+  document.getElementById('sections').innerHTML=vis.map(cat=>{
+    const open=!!S.open[cat.id];
+    const rows=cat.items.map(item=>{
+      const ck=!!S.checked[item.id],fl=!!S.flagged[item.id];
+      const tags=[];
+      if(item.miss) tags.push('<span class="tag tag-miss">easy miss</span>');
+      if(item.rcc) tags.push('<span class="tag tag-rcc">RCC</span>');
+      if(item.sub&&item.sub.length){
+        const matchingSubs=S.subs.length?item.sub.filter(s=>S.subs.includes(s)):item.sub;
+        if(matchingSubs.length) tags.push('<span class="tag tag-sub">'+matchingSubs.join(', ')+'</span>');
+      }
+      return `<div class="item" onclick="toggleCheck('${item.id}')">
+        <div class="cb${ck?' ck':fl?' fl':''}">${ck?'✓':fl?'!':''}</div>
+        <div class="item-body">
+          <div class="item-what${ck?' ck':''}">${item.t}</div>
+          <div class="item-why${ck?' ck':''}">${item.w}</div>
+          ${tags.length?`<div class="item-tags">${tags.join('')}</div>`:''}
+        </div>
+        <button class="flag-btn${fl?' on':''}" onclick="toggleFlag('${item.id}',event)">🚩</button>
+      </div>`;
+    }).join('');
+    return `<div class="section">
+      <div class="sec-hdr" onclick="toggleSec('${cat.id}')">
+        <div class="sec-left">
+          <span class="sec-icon">${cat.icon}</span>
+          <div class="sec-title-wrap">
+            <div class="sec-lbl">${cat.label}</div>
+            ${cat.sub?`<div class="sec-sub">${cat.sub}</div>`:''}
+          </div>
+        </div>
+        <div class="sec-right">${badge(cat)}<span class="caret${open?' open':''}">⌄</span></div>
+      </div>
+      <div class="sec-body${open?' open':''}">${rows}</div>
+    </div>`;
+  }).join('');
+}
+
+// INIT
+load();
+buildSubCheckboxes();
+document.getElementById('site-input').addEventListener('keydown',function(e){if(e.key==='Enter')startChecklist();});
+if(S.site){showChecklist();}
+</script>
+</body>
+</html>
